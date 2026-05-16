@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHOOP Integration — Apex Dashboard UX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0A0A; color: #E8E8E8; font-family: 'Space Mono', monospace; padding: 48px 24px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 56px; }
+  .logo { font-size: 20px; font-weight: 700; color: #C8F135; letter-spacing: 0.2em; }
+  .badge { font-size: 9px; color: #444; border: 1px solid #1E1E1E; padding: 6px 12px; letter-spacing: 0.15em; border-radius: 4px; }
+
+  /* Section */
+  .section-label { font-size: 9px; color: #C8F135; letter-spacing: 0.25em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1E1E1E; }
+  .section { margin-bottom: 56px; }
+
+  /* Overview text */
+  .overview { font-size: 12px; color: #888; line-height: 1.9; margin-bottom: 40px; max-width: 620px; }
+  .overview strong { color: #E8E8E8; }
+
+  /* Dashboard mockup */
+  .mockup { background: #111; border: 1px solid #1E1E1E; border-radius: 14px; padding: 24px; margin-bottom: 32px; }
+  .mockup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .mockup-title { font-size: 10px; color: #444; letter-spacing: 0.2em; }
+  .whoop-badge { font-size: 9px; background: #C8F135; color: #0A0A0A; padding: 4px 10px; border-radius: 4px; font-weight: 700; letter-spacing: 0.1em; }
+
+  /* Metric cards */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .metric-card { background: #0A0A0A; border: 1px solid #1E1E1E; border-radius: 10px; padding: 16px; }
+  .metric-label { font-size: 8px; color: #444; letter-spacing: 0.2em; margin-bottom: 8px; }
+  .metric-value { font-size: 24px; font-weight: 700; }
+  .metric-sub { font-size: 9px; color: #444; margin-top: 4px; }
+  .strain { color: #FF6B35; }
+  .recovery-high { color: #4ADE80; }
+  .recovery-mid { color: #FCD34D; }
+  .hrv { color: #C8F135; }
+  .sleep { color: #818CF8; }
+
+  /* Recovery bar */
+  .recovery-bar { background: #1E1E1E; border-radius: 6px; height: 6px; margin-top: 6px; overflow: hidden; }
+  .recovery-fill { height: 6px; border-radius: 6px; }
+
+  /* Trend chart mockup */
+  .chart-area { background: #0A0A0A; border: 1px solid #1E1E1E; border-radius: 10px; padding: 16px; }
+  .chart-label { font-size: 8px; color: #444; letter-spacing: 0.2em; margin-bottom: 12px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 60px; }
+  .bar { flex: 1; border-radius: 3px 3px 0 0; opacity: 0.8; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; gap: 0; margin-bottom: 32px; flex-wrap: wrap; gap: 8px; }
+  .flow-step { background: #111; border: 1px solid #1E1E1E; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 140px; }
+  .flow-num { font-size: 9px; color: #C8F135; letter-spacing: 0.15em; margin-bottom: 6px; }
+  .flow-title { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .flow-desc { font-size: 10px; color: #555; line-height: 1.5; }
+  .flow-arrow { color: #333; font-size: 18px; flex-shrink: 0; }
+
+  /* Data points list */
+  .data-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .data-item { background: #111; border: 1px solid #1E1E1E; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .data-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .data-text { font-size: 11px; color: #AAA; }
+  .data-text strong { color: #E8E8E8; display: block; margin-bottom: 2px; }
+
+  /* Connect screen mockup */
+  .connect-mockup { background: #111; border: 1px solid #1E1E1E; border-radius: 14px; padding: 32px; text-align: center; max-width: 380px; }
+  .connect-logo { font-size: 28px; font-weight: 700; color: #C8F135; letter-spacing: 0.2em; margin-bottom: 4px; }
+  .connect-sub { font-size: 9px; color: #444; letter-spacing: 0.2em; margin-bottom: 28px; }
+  .connect-desc { font-size: 11px; color: #666; line-height: 1.7; margin-bottom: 24px; }
+  .connect-btn { background: #C8F135; color: #0A0A0A; border: none; padding: 12px 28px; border-radius: 8px; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer; width: 100%; }
+  .connect-note { font-size: 9px; color: #333; margin-top: 14px; line-height: 1.6; }
+
+  /* Permissions list */
+  .perm-list { text-align: left; margin: 0 0 20px; padding: 0; list-style: none; }
+  .perm-list li { font-size: 10px; color: #666; padding: 6px 0; border-bottom: 1px solid #1A1A1A; display: flex; align-items: center; gap: 8px; }
+  .perm-list li:last-child { border-bottom: none; }
+  .perm-check { color: #C8F135; font-size: 12px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  .caption { font-size: 10px; color: #333; margin-top: 12px; text-align: center; letter-spacing: 0.1em; }
+
+  .divider { border: none; border-top: 1px solid #1E1E1E; margin: 40px 0; }
+  .footer { font-size: 10px; color: #333; text-align: center; padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="logo">APEX</div>
+      <div style="font-size:9px;color:#444;letter-spacing:0.2em;margin-top:3px;">PERSONAL OS — UX INTEGRATION OVERVIEW</div>
+    </div>
+    <div class="badge">WHOOP API INTEGRATION PROPOSAL</div>
+  </div>
+
+  <!-- Overview -->
+  <div class="section">
+    <div class="section-label">01 — OVERVIEW</div>
+    <p class="overview">
+      <strong>Apex Dashboard</strong> is a personal performance OS for athletes and high-performers. WHOOP data is the foundation of the health layer — giving users a real-time picture of their body's readiness alongside their habits, goals, and journal. The integration is <strong>read-only</strong>, personal use only, and data is never shared with third parties.
+    </p>
+  </div>
+
+  <!-- OAuth Flow -->
+  <div class="section">
+    <div class="section-label">02 — CONNECTION FLOW</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">STEP 01</div>
+        <div class="flow-title">Connect</div>
+        <div class="flow-desc">User clicks "Connect WHOOP" in dashboard settings</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 02</div>
+        <div class="flow-title">Authorise</div>
+        <div class="flow-desc">Redirected to WHOOP OAuth login — user approves read-only scopes</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 03</div>
+        <div class="flow-title">Sync</div>
+        <div class="flow-desc">Token stored locally. Dashboard fetches latest WHOOP data on load</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 04</div>
+        <div class="flow-title">Display</div>
+        <div class="flow-desc">Metrics render in the dashboard header. AI mentor receives context</div>
+      </div>
+    </div>
+
+    <!-- Connect screen mockup -->
+    <div class="two-col">
+      <div>
+        <div class="connect-mockup">
+          <div class="connect-logo">APEX</div>
+          <div class="connect-sub">PERSONAL OS</div>
+          <div class="connect-desc">Connect your WHOOP to pull live recovery, strain, HRV, and sleep data into your dashboard.</div>
+          <ul class="perm-list">
+            <li><span class="perm-check">✓</span> Read daily strain score</li>
+            <li><span class="perm-check">✓</span> Read recovery & HRV</li>
+            <li><span class="perm-check">✓</span> Read sleep performance</li>
+            <li><span class="perm-check">✓</span> Read workout data</li>
+          </ul>
+          <button class="connect-btn">CONNECT WHOOP</button>
+          <div class="connect-note">Read-only access. No data is shared or sold. Disconnect anytime from WHOOP app settings.</div>
+        </div>
+        <div class="caption">FIG 1 — CONNECTION SCREEN</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="background:#111;border:1px solid #1E1E1E;border-radius:10px;padding:16px;">
+          <div style="font-size:9px;color:#444;letter-spacing:0.2em;margin-bottom:8px;">SCOPES REQUESTED</div>
+          <div style="font-size:11px;color:#888;line-height:1.8;">
+            read:recovery<br>
+            read:cycles<br>
+            read:workout<br>
+            read:sleep<br>
+            read:profile<br>
+            read:body_measurement
+          </div>
+        </div>
+        <div style="background:#111;border:1px solid #1E1E1E;border-radius:10px;padding:16px;">
+          <div style="font-size:9px;color:#444;letter-spacing:0.2em;margin-bottom:8px;">DATA USAGE</div>
+          <div style="font-size:11px;color:#888;line-height:1.8;">Personal use only. No server-side storage. Token held in browser. No analytics or third-party sharing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard integration mockup -->
+  <div class="section">
+    <div class="section-label">03 — DASHBOARD INTEGRATION</div>
+    <div class="mockup">
+      <div class="mockup-header">
+        <div class="mockup-title">TODAY — DASHBOARD VIEW</div>
+        <div class="whoop-badge">● WHOOP LIVE</div>
+      </div>
+
+      <!-- Metric cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">STRAIN</div>
+          <div class="metric-value strain">14.2</div>
+          <div class="metric-sub">/ 21 max</div>
+          <div class="recovery-bar"><div class="recovery-fill" style="width:68%;background:#FF6B35;"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">RECOVERY</div>
+          <div class="metric-value recovery-high">68%</div>
+          <div class="metric-sub">Green — Train hard</div>
+          <div class="recovery-bar"><div class="recovery-fill" style="width:68%;background:#4ADE80;"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">HRV</div>
+          <div class="metric-value hrv">52<span style="font-size:12px;color:#444;">ms</span></div>
+          <div class="metric-sub">+4ms vs baseline</div>
+          <div class="recovery-bar"><div class="recovery-fill" style="width:72%;background:#C8F135;"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">SLEEP</div>
+          <div class="metric-value sleep">7.1<span style="font-size:12px;color:#444;">h</span></div>
+          <div class="metric-sub">84% efficiency</div>
+          <div class="recovery-bar"><div class="recovery-fill" style="width:84%;background:#818CF8;"></div></div>
+        </div>
+      </div>
+
+      <!-- 7-day trend -->
+      <div class="chart-area">
+        <div class="chart-label">7-DAY RECOVERY TREND</div>
+        <div class="chart-bars">
+          <div class="bar" style="height:45%;background:#EF4444;"></div>
+          <div class="bar" style="height:55%;background:#FCD34D;"></div>
+          <div class="bar" style="height:70%;background:#4ADE80;"></div>
+          <div class="bar" style="height:62%;background:#4ADE80;"></div>
+          <div class="bar" style="height:30%;background:#EF4444;"></div>
+          <div class="bar" style="height:58%;background:#FCD34D;"></div>
+          <div class="bar" style="height:68%;background:#4ADE80;border:1px solid #C8F135;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+          <span style="font-size:8px;color:#333;">MON</span>
+          <span style="font-size:8px;color:#333;">TUE</span>
+          <span style="font-size:8px;color:#333;">WED</span>
+          <span style="font-size:8px;color:#333;">THU</span>
+          <span style="font-size:8px;color:#333;">FRI</span>
+          <span style="font-size:8px;color:#333;">SAT</span>
+          <span style="font-size:8px;color:#C8F135;">TODAY</span>
+        </div>
+      </div>
+    </div>
+    <div class="caption">FIG 2 — WHOOP DATA IN DASHBOARD (READ-ONLY DISPLAY)</div>
+  </div>
+
+  <!-- Data points used -->
+  <div class="section">
+    <div class="section-label">04 — DATA POINTS USED</div>
+    <div class="data-list">
+      <div class="data-item">
+        <div class="data-dot" style="background:#FF6B35;"></div>
+        <div class="data-text"><strong>Daily Strain</strong>Displayed as score out of 21. Used to inform AI mentor training recommendations.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-dot" style="background:#4ADE80;"></div>
+        <div class="data-text"><strong>Recovery Score</strong>Shown as percentage with colour-coded status (green/yellow/red).</div>
+      </div>
+      <div class="data-item">
+        <div class="data-dot" style="background:#C8F135;"></div>
+        <div class="data-text"><strong>Heart Rate Variability</strong>Shown in milliseconds vs personal baseline. Tracked over 7 days.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-dot" style="background:#818CF8;"></div>
+        <div class="data-text"><strong>Sleep Performance</strong>Total hours and sleep efficiency percentage displayed on dashboard.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-dot" style="background:#FB923C;"></div>
+        <div class="data-text"><strong>Workout Data</strong>Sport type and duration optionally shown in daily activity log.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-dot" style="background:#38BDF8;"></div>
+        <div class="data-text"><strong>AI Mentor Context</strong>WHOOP metrics passed as read-only context to AI mentor for personalised advice. Never stored externally.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="footer">APEX DASHBOARD — PERSONAL USE — WHOOP INTEGRATION UX PROPOSAL — 2026</div>
+
+</div>
+</body>
+</html>
